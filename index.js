@@ -39,6 +39,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectToMongoDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 // Load environment variables first
 dotenv.config();
@@ -68,6 +69,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/product", productRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
