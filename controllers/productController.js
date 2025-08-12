@@ -22,8 +22,13 @@ export const createProduct = async (req, res) => {
         rating,
         category,
       });
-      await newProduct.save();
-      res.status(201).json({ message: "product created successfully" });
+      const savedProduct = await newProduct.save();
+      res
+        .status(201)
+        .json({
+          message: "product created successfully",
+          product: savedProduct,
+        });
     }
   } catch (err) {
     console.log(err);
@@ -105,7 +110,7 @@ export const deleteAllProducts = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    let products = await ProductModel.find();
+    let products = await ProductModel.find().sort({ createdAt: -1 });
     if (!products) {
       return res.status(404).json({ message: "no products found" });
     } else {
