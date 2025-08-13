@@ -47,11 +47,16 @@ export const getCartData = async (req, res) => {
     }
 
     // Populate product details if needed
-    const cart = await Cart.findOne({ userId }).populate("products.productId");
+    const cart = await Cart.findOne({ userId })
+      .populate("products.productId")
+      .lean();
 
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
+    cart.products.sort((a, b) => {
+      return new Date(b.productId.createdAt) - new Date(a.productId.createdAt);
+    });
 
     res.status(200).json({
       message: "Cart data fetched successfully",
@@ -63,6 +68,56 @@ export const getCartData = async (req, res) => {
   }
 };
 
-// export const deleteCart=async(req,res)=>{
+export const deleteAllCartItems = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-// }
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Clear products array for that user's cart instead of deleting the whole document
+    const cart = await Cart.findOneAndUpdate(
+      { userId },
+      { $set: { products: [] } }, // empty the products array
+      { new: true }
+    );
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    res.json({ message: "All items deleted successfully", cart });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+export const deleteCartItem = async (req, res) => {
+  try {
+    const { userId, productId } = req.params;
+
+    if (!userId || !productId) {
+      return res
+        .status(400)
+        .json({ message: "User ID and Product ID are required" });
+    }
+
+    // Remove only the matching product from the products array
+    const cart = await Cart.findOneAndUpdate(
+      { userId },
+      { $pull: { products: { productId } } }, // pull product from array
+      { new: true }
+    );
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    res.json({ message: "Product removed successfully", cart });
+  } catch (error) {
+    console.error("Error removing cart item:", error.message);
+    res.status(500).send("Server Error");
+  }
+};
