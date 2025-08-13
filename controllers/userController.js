@@ -40,10 +40,16 @@ export const loginUser = async (req, res) => {
         .json({ message: "Incorrect email or password. Please try again." });
 
     //optional
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
+    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
     });
-    res.status(200).json({ message: "You've Login successfully", token, user });
+    res.status(200).json({
+      message: "You've Login successfully",
+      jwtToken,
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+    });
   } catch (err) {
     res.status(505).json({ message: "Login Failed", error: err.message });
   }

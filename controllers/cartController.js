@@ -37,3 +37,32 @@ export const addToCart = async (req, res) => {
     res.status(500).json({ message: "Error adding to cart", error });
   }
 };
+
+export const getCartData = async (req, res) => {
+  try {
+    const { userId } = req.params; // or req.params if you send via URL
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Populate product details if needed
+    const cart = await Cart.findOne({ userId }).populate("products.productId");
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    res.status(200).json({
+      message: "Cart data fetched successfully",
+      cart,
+    });
+  } catch (error) {
+    console.error("Error fetching cart data:", error);
+    res.status(500).json({ message: "Error fetching cart data", error });
+  }
+};
+
+// export const deleteCart=async(req,res)=>{
+
+// }
