@@ -23,12 +23,10 @@ export const createProduct = async (req, res) => {
         category,
       });
       const savedProduct = await newProduct.save();
-      res
-        .status(201)
-        .json({
-          message: "product created successfully",
-          product: savedProduct,
-        });
+      res.status(201).json({
+        message: "product created successfully",
+        product: savedProduct,
+      });
     }
   } catch (err) {
     console.log(err);
@@ -151,5 +149,55 @@ export const getSingleProduct = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "something went wrong" });
+  }
+};
+
+//Get data based on category
+
+export const getProductByCategory = async (req, res) => {
+  const category = req.params.category;
+  try {
+    if (!category) {
+      return res
+        .status(400)
+        .json({ message: "please provide a valid category" });
+    }
+    let products = await ProductModel.find({
+      category,
+    }); // { $regex: new RegExp(category, "i")
+
+    if (products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: `No products found in ${category}` });
+    }
+    res
+      .status(200)
+      .json({ message: `${products.length} products found`, products });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "something went wrong" });
+  }
+};
+
+//Get data based on search query
+
+// GET /api/products/search?q=toys
+export const searchProducts = async (req, res) => {
+  try {
+    const query = req.params.keyword?.trim();
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+    const products = await ProductModel.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } }, // search by product name
+        { category: { $regex: query, $options: "i" } }, // search by category name
+      ],
+    });
+    res.json({ products });
+  } catch (error) {
+    res.status(500).json({ message: "Error searching products", error });
   }
 };
