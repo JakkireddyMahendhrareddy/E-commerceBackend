@@ -69,7 +69,7 @@ app.use(
   cors({
     origin: [
       "https://nxttrendprojectmahi-euihkib5e.vercel.app",
-      "http://localhost:5173",
+      "http://localhost:3000",
     ],
 
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

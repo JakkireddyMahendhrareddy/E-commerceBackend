@@ -18,13 +18,23 @@ export const addToCart = async (req, res) => {
         cart.products[existingProductIndex].quantity += quantity;
       } else {
         // Product not in cart → push new item
-        cart.products.push({ productId, quantity });
+        cart.products.push({
+          productId,
+          quantity,
+          message: "product addded to cart successfully",
+        });
       }
     } else {
       // No cart for user → create one
       cart = new Cart({
         userId,
-        products: [{ productId, quantity }],
+        products: [
+          {
+            productId,
+            quantity,
+            message: "product addded to cart successfully",
+          },
+        ],
       });
     }
 
@@ -65,6 +75,58 @@ export const getCartData = async (req, res) => {
   } catch (error) {
     console.error("Error fetching cart data:", error);
     res.status(500).json({ message: "Error fetching cart data", error });
+  }
+};
+
+export const updateCartItemQuantity = async (req, res) => {
+  try {
+    const { userId, productId } = req.params;
+    const { quantity } = req.body;
+
+    if (!userId || !productId) {
+      return res
+        .status(400)
+        .json({ message: "User ID and Product ID are required" });
+    }
+
+    if (quantity < 1) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than zero." });
+    }
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const productIndex = cart.products.findIndex(
+      (item) => item.productId.toString() === productId
+    );
+
+    if (productIndex !== -1) {
+      // Get original unit price (you can store it separately to avoid cumulative multiplication)
+      const unitPrice =
+        cart.products[productIndex].unitPrice ||
+        cart.products[productIndex].price;
+
+      // Update quantity
+      cart.products[productIndex].quantity = quantity;
+
+      // Update price as double based on quantity
+      cart.products[productIndex].price = unitPrice * quantity;
+
+      // Store unitPrice for future updates (only once)
+      cart.products[productIndex].unitPrice = unitPrice;
+
+      await cart.save();
+      return res.json(cart);
+    } else {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 };
 
