@@ -199,8 +199,6 @@
 // };
 
 import Cart from "../models/cartModel.js";
-import Product from "../models/productModel.js"; // ✅ Import Product model
-import User from "../models/userModel.js"; // ✅ Import User model
 import mongoose from "mongoose";
 
 export const addToCart = async (req, res) => {
