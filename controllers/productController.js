@@ -1,36 +1,82 @@
 import ProductModel from "../models/productModel.js";
 
 //delete product
+// export const createProduct = async (req, res) => {
+//   const { name, image, price, productDetails, rating, category } = req.body;
+//   try {
+//     if (
+//       !name ||
+//       !image ||
+//       !price ||
+//       !productDetails ||
+//       rating === undefined ||
+//       !category
+//     ) {
+//       return res.status(400).json({ message: "Please fill all the fields" });
+//     } else {
+//       let newProduct = new ProductModel({
+//         name,
+//         image,
+//         price,
+//         productDetails,
+//         rating,
+//         category,
+//       });
+//       const savedProduct = await newProduct.save();
+//       res.status(201).json({
+//         message: "product created successfully",
+//         product: savedProduct,
+//       });
+//     }
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500), json({ message: "something went wrong" });
+//   }
+// };
+
 export const createProduct = async (req, res) => {
-  const { name, image, price, productDetails, rating, category } = req.body;
   try {
+    const { name, price, productDetails, rating, category, image } = req.body;
+
+    // check if file uploaded OR image URL provided
+    let imagePath = "";
+    if (req.file) {
+      imagePath = req.file.path; // Cloudinary URL
+    } else if (image) {
+      imagePath = image; // Direct image link
+    }
+
+    // validation
     if (
       !name ||
-      !image ||
       !price ||
       !productDetails ||
       rating === undefined ||
-      !category
+      !category ||
+      !imagePath
     ) {
       return res.status(400).json({ message: "Please fill all the fields" });
-    } else {
-      let newProduct = new ProductModel({
-        name,
-        image,
-        price,
-        productDetails,
-        rating,
-        category,
-      });
-      const savedProduct = await newProduct.save();
-      res.status(201).json({
-        message: "product created successfully",
-        product: savedProduct,
-      });
     }
+
+    // create product
+    const newProduct = new ProductModel({
+      name,
+      image: imagePath,
+      price,
+      productDetails,
+      rating,
+      category,
+    });
+
+    const savedProduct = await newProduct.save();
+
+    res.status(201).json({
+      message: "Product created successfully",
+      product: savedProduct,
+    });
   } catch (err) {
-    console.log(err);
-    res.status(500), json({ message: "something went wrong" });
+    console.error("Error creating product:", err);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
