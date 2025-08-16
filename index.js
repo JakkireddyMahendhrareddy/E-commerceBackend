@@ -227,6 +227,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
+      "https://e-commerce-test-drkl.vercel.app",
       "http://localhost:5173", // Vite local
       "http://localhost:3000", // CRA local
       "https://nxttrendprojectmahi-euihkib5e.vercel.app", // deployed frontend
