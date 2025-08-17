@@ -77,7 +77,7 @@ const cartSchema = new schema(
       type: schema.Types.ObjectId,
       ref: "user", // ✅ lowercase if your model is registered as "user"
       required: true,
-      index: true,
+      // ❌ Remove this line: index: true,
     },
     products: [
       {
@@ -109,10 +109,11 @@ const cartSchema = new schema(
   },
   {
     timestamps: true,
-    indexes: [{ userId: 1 }, { "products.productId": 1 }],
+    indexes: [{ "products.productId": 1 }], // ❌ Removed duplicate userId index
   }
 );
 
+// ✅ Keep this - it creates a unique index on userId
 cartSchema.index({ userId: 1 }, { unique: true });
 
 const Cart = mongoose.model("Cart", cartSchema);
